@@ -18,11 +18,12 @@ interface Props {
   onRename: (name: string) => void;
   onDuplicate: () => void;
   onRemove: () => void;
+  onSelect: () => void;
 }
 
-export function ScenarioForm({ scenario, errors, onUpdate, onRename, onDuplicate, onRemove }: Props) {
+export function ScenarioForm({ scenario, errors, onUpdate, onRename, onDuplicate, onRemove, onSelect }: Props) {
   return (
-    <section className="scenario-card" style={{ '--accent': scenario.color } as CSSProperties}>
+    <section className="scenario-card" style={{ '--accent': scenario.color } as CSSProperties} onFocusCapture={onSelect}>
       <div className="scenario-card__head">
         <span className="scenario-dot" />
         <input className="scenario-name" aria-label="情景名称" value={scenario.name} onChange={(event) => onRename(event.target.value)} />

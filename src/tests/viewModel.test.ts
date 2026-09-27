@@ -36,4 +36,38 @@ describe('MoneyScenarioViewModel', () => {
     expect(vm.getSnapshot().status).toBe('error');
     expect(vm.getSnapshot().scenarios).toHaveLength(3);
   });
+
+  it('switches the selected scenario and ignores unknown ids', async () => {
+    const vm = new MoneyScenarioViewModel(new MemoryRepository());
+    await vm.init();
+    vm.selectScenario('growth');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+    vm.selectScenario('ghost');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+  });
+
+  it('keeps the selection when removing another scenario', async () => {
+    const vm = new MoneyScenarioViewModel(new MemoryRepository());
+    await vm.init();
+    vm.selectScenario('growth');
+    vm.removeScenario('balanced');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+  });
+
+  it('moves the selection to a neighbor when the selected scenario is removed', async () => {
+    const vm = new MoneyScenarioViewModel(new MemoryRepository());
+    await vm.init();
+    vm.selectScenario('balanced');
+    vm.removeScenario('balanced');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+    vm.removeScenario('growth');
+    expect(vm.getSnapshot().selectedId).toBe('steady');
+  });
+
+  it('repairs a persisted selection that points to a missing scenario', async () => {
+    const saved = { version: 1 as const, scenarios: SAMPLE_SCENARIOS, selectedId: 'ghost' };
+    const vm = new MoneyScenarioViewModel(new MemoryRepository(saved));
+    await vm.init();
+    expect(vm.getSnapshot().selectedId).toBe('steady');
+  });
 });

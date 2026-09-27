@@ -29,11 +29,11 @@ export default function App() {
         <section className="content">
           <div className="section-heading"><div><span className="eyebrow">01 · SCENARIOS</span><h2>编辑资金情景</h2></div><button className="secondary-button" type="button" onClick={() => viewModel.addScenario()}>＋ 新增情景</button></div>
           <div className="scenario-list">
-            {state.scenarios.map((scenario) => <ScenarioForm key={scenario.id} scenario={scenario} errors={state.errors[scenario.id] ?? {}} onUpdate={(field, value) => viewModel.updateField(scenario.id, field, value)} onRename={(name) => viewModel.renameScenario(scenario.id, name)} onDuplicate={() => viewModel.duplicateScenario(scenario.id)} onRemove={() => viewModel.removeScenario(scenario.id)} />)}
+            {state.scenarios.map((scenario) => <ScenarioForm key={scenario.id} scenario={scenario} errors={state.errors[scenario.id] ?? {}} onUpdate={(field, value) => viewModel.updateField(scenario.id, field, value)} onRename={(name) => viewModel.renameScenario(scenario.id, name)} onDuplicate={() => viewModel.duplicateScenario(scenario.id)} onRemove={() => viewModel.removeScenario(scenario.id)} onSelect={() => viewModel.selectScenario(scenario.id)} />)}
           </div>
 
           <div className="results-heading"><div><span className="eyebrow">02 · OUTCOME</span><h2>长期结果对比</h2></div><div className="result-highlight"><span>最高名义终值</span><strong>¥ {formatMoney(totalValue)}</strong></div></div>
-          {state.projections.length > 0 ? <><ComparisonChart scenarios={state.scenarios} projections={state.projections} /><ScenarioTable scenarios={state.scenarios} projections={state.projections} /></> : <div className="empty-result"><span>⌁</span><strong>修正参数后即可生成对比</strong><p>请检查标红字段，年限最多支持 60 年。</p></div>}
+          {state.projections.length > 0 ? <><ComparisonChart scenarios={state.scenarios} projections={state.projections} activeId={state.selectedId} onSelect={(id) => viewModel.selectScenario(id)} /><ScenarioTable scenarios={state.scenarios} projections={state.projections} /></> : <div className="empty-result"><span>⌁</span><strong>修正参数后即可生成对比</strong><p>请检查标红字段，年限最多支持 60 年。</p></div>}
           <footer><span>ⓘ 结果为基于输入假设的数学模拟，不代表未来实际表现，也不构成任何投资建议。</span><span>本地优先 · 保存后可恢复</span></footer>
         </section>
       </div>

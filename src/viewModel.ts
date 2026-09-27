@@ -48,6 +48,12 @@ export class MoneyScenarioViewModel {
     }
   }
 
+  selectScenario(id: string): void {
+    if (this.state.selectedId === id) return;
+    if (!this.state.scenarios.some((scenario) => scenario.id === id)) return;
+    this.setState({ selectedId: id });
+  }
+
   updateField(id: string, field: ScenarioField, value: number): void {
     const scenarios = this.state.scenarios.map((scenario) => scenario.id === id ? { ...scenario, [field]: value } : scenario);
     this.applyScenarios(scenarios, id, '参数已更新，结果实时刷新');
@@ -83,8 +89,12 @@ export class MoneyScenarioViewModel {
 
   removeScenario(id: string): void {
     if (this.state.scenarios.length <= 1) return;
+    const index = this.state.scenarios.findIndex((scenario) => scenario.id === id);
     const scenarios = this.state.scenarios.filter((scenario) => scenario.id !== id);
-    this.applyScenarios(scenarios, scenarios[0].id, '情景已移除');
+    // 删掉的是当前情景时，高亮移到相邻情景；否则保持原选中不变
+    const neighbor = scenarios[Math.min(Math.max(index, 0), scenarios.length - 1)]?.id ?? '';
+    const selectedId = this.state.selectedId === id ? neighbor : this.state.selectedId;
+    this.applyScenarios(scenarios, selectedId, '情景已移除');
   }
 
   async save(): Promise<void> {
@@ -109,7 +119,9 @@ export class MoneyScenarioViewModel {
       if (Object.keys(scenarioErrors).length) errors[scenario.id] = scenarioErrors;
       else projections.push(calculateProjection(scenario));
     });
-    this.setState({ scenarios, selectedId, errors, projections, status: Object.keys(errors).length ? 'editing' : 'ready', message });
+    // 兜底：选中 id 必须指向仍存在的情景，杜绝指向已删除情景的残留
+    const safeSelectedId = scenarios.some((scenario) => scenario.id === selectedId) ? selectedId : scenarios[0]?.id ?? '';
+    this.setState({ scenarios, selectedId: safeSelectedId, errors, projections, status: Object.keys(errors).length ? 'editing' : 'ready', message });
   }
 
   private setState(patch: Partial<MoneyScenarioState>): void {
