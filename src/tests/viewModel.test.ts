@@ -36,4 +36,25 @@ describe('MoneyScenarioViewModel', () => {
     expect(vm.getSnapshot().status).toBe('error');
     expect(vm.getSnapshot().scenarios).toHaveLength(3);
   });
+
+  it('switches the selected scenario and ignores unknown or repeated ids', async () => {
+    const vm = new MoneyScenarioViewModel(new MemoryRepository());
+    await vm.init();
+    vm.selectScenario('growth');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+    vm.selectScenario('missing');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+    vm.selectScenario('growth');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+  });
+
+  it('keeps selection when removing another scenario and falls back when removing the selected one', async () => {
+    const vm = new MoneyScenarioViewModel(new MemoryRepository());
+    await vm.init();
+    vm.selectScenario('growth');
+    vm.removeScenario('steady');
+    expect(vm.getSnapshot().selectedId).toBe('growth');
+    vm.removeScenario('growth');
+    expect(vm.getSnapshot().scenarios.some((scenario) => scenario.id === vm.getSnapshot().selectedId)).toBe(true);
+  });
 });

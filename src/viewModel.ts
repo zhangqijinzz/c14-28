@@ -81,10 +81,18 @@ export class MoneyScenarioViewModel {
     this.applyScenarios([...this.state.scenarios, copy], copy.id, '已复制情景，可修改任意参数比较差异');
   }
 
+  selectScenario(id: string): void {
+    const scenario = this.state.scenarios.find((item) => item.id === id);
+    if (!scenario || id === this.state.selectedId) return;
+    this.setState({ selectedId: id, message: `正在编辑「${scenario.name}」` });
+  }
+
   removeScenario(id: string): void {
     if (this.state.scenarios.length <= 1) return;
     const scenarios = this.state.scenarios.filter((scenario) => scenario.id !== id);
-    this.applyScenarios(scenarios, scenarios[0].id, '情景已移除');
+    // 被删的不是当前情景时保留原选中；否则回退到第一个，保证 selectedId 永远指向存在的情景
+    const selectedId = scenarios.some((scenario) => scenario.id === this.state.selectedId) ? this.state.selectedId : scenarios[0].id;
+    this.applyScenarios(scenarios, selectedId, '情景已移除');
   }
 
   async save(): Promise<void> {
